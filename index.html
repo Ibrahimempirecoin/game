@@ -23,7 +23,7 @@
         #coin {
             width: 200px;
             height: 200px;
-            background-image: url('images/Main\ Coin.png'); /* Замените на ваш URL изображения монеты */
+            background-image: url('images/Main Coin.png'); /* Замените на ваш URL изображения монеты */
             background-size: cover;
             cursor: pointer;
             margin-top: 20px;
@@ -91,6 +91,7 @@
         let score = 0;
         let energy = 1500;
         const maxEnergy = 1500;
+        const recoveryRate = 1; // Скорость восстановления энергии в единицах в секунду
 
         document.addEventListener('DOMContentLoaded', () => {
             const scoreValue = document.getElementById('score-value');
@@ -101,8 +102,18 @@
             // Load saved game state
             const savedScore = localStorage.getItem('score');
             const savedEnergy = localStorage.getItem('energy');
+            const lastRecoveryTime = localStorage.getItem('lastRecoveryTime');
+
             if (savedScore !== null) score = parseInt(savedScore, 10);
             if (savedEnergy !== null) energy = parseInt(savedEnergy, 10);
+
+            // Calculate energy recovery since last time
+            const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+            if (lastRecoveryTime !== null) {
+                const elapsedTime = currentTime - parseInt(lastRecoveryTime, 10);
+                const recoveredEnergy = Math.floor(elapsedTime * recoveryRate);
+                energy = Math.min(maxEnergy, energy + recoveredEnergy);
+            }
 
             scoreValue.textContent = score;
             updateEnergyBar();
@@ -123,6 +134,7 @@
                     energy++;
                     updateEnergyBar();
                     localStorage.setItem('energy', energy);
+                    localStorage.setItem('lastRecoveryTime', Math.floor(Date.now() / 1000));
                 }
             }, 1000);
 
@@ -130,6 +142,9 @@
                 energyBarInner.style.width = `${(energy / maxEnergy) * 100}%`;
                 energyValue.textContent = `${energy}/${maxEnergy}`;
             }
+
+            // Save the current time as the last recovery time
+            localStorage.setItem('lastRecoveryTime', Math.floor(Date.now() / 1000));
         });
     </script>
 </body>
